@@ -31,7 +31,6 @@ export default function MainScreen({navigation}) {
     }, [search]);
 
     const getLocation = async () => {
-        console.log('GETTING GPS DATA')
         const {status} = await Location.requestForegroundPermissionsAsync();
         if (status === 'granted') {
             const locationGeo = await Location.getCurrentPositionAsync();
@@ -39,7 +38,6 @@ export default function MainScreen({navigation}) {
                 latitude: locationGeo.coords.latitude,
                 longitude: locationGeo.coords.longitude
             })
-            console.log(locationRevGeocode);
             return locationRevGeocode[0].country;
         } else {
             console.log('Permission not granted')
@@ -52,7 +50,6 @@ export default function MainScreen({navigation}) {
             .request(options)
             .then((response) => {
                 const newList = response.data.response;
-                console.log(newList[0])
                 setList(newList);
             })
             .catch(function (error) {
@@ -61,17 +58,38 @@ export default function MainScreen({navigation}) {
     }
 
     const sortList = (a, b) => {
-        if (a.country === currentCountry) {
-            return 1;
+        const sortBy = 'NEW_CASES'
+        switch (sortBy) {
+            case 'TOTAL':
+                if (b.cases.total) {
+                    if (a.cases.total) {
+                        return b.cases.total > a.cases.total ? 1 : -1
+                    }
+                    return 1;
+                } else {
+                    return 0;
+                }
+
+            case 'NEW_CASES':
+                if (a.cases.new && b.cases.new) {
+                    const aString = a.cases.new.substring(1);
+                    const bString = b.cases.new.substring(1);
+                    const aInt = parseInt(aString, 10);
+                    const bInt = parseInt(bString, 10);
+                    return bInt - aInt;
+                } else if (!a.cases.new) {
+                    return 1
+                } else if (!b.cases.new) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+
+            default:
+                return 0;
         }
-        if (b.cases.total) {
-            if (a.cases.total) {
-                return b.cases.total > a.cases.total ? 1 : -1
-            }
-            return 1;
-        } else {
-            return 0;
-        }
+
+
     }
 
 
@@ -109,6 +127,7 @@ export default function MainScreen({navigation}) {
                             <ListItem.Title>{item.country}</ListItem.Title>
                             <ListItem.Subtitle>
                                 Total cases: {item.cases.total}
+                                New: {item.cases.new ?? 'none'}
                                 From nav: {item.country === currentCountry ? 'yes' : 'no'}
                             </ListItem.Subtitle>
                         </ListItem.Content>

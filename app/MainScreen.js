@@ -58,6 +58,9 @@ export default function MainScreen({navigation}) {
     }
 
     const sortList = (a, b) => {
+        if (a.country === currentCountry) {
+            return -1;
+        }
         const sortBy = 'NEW_CASES'
         switch (sortBy) {
             case 'TOTAL':

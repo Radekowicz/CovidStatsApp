@@ -21,23 +21,30 @@ export default function MainScreen({navigation}) {
     const [search, setSearch] = useState('');
     const [currentCountry, setCurrentCountry] = useState('');
 
-
     useEffect(() => {
         getListRequest();
-        getLocation();
+        getLocation().then(country => setCurrentCountry(country));
     }, []);
 
+    useEffect(() => {
+        updateSearch(search);
+    }, [search]);
+
     const getLocation = async () => {
-        console.log('GETTING')
+        console.log('GETTING GPS DATA')
         const {status} = await Location.requestForegroundPermissionsAsync();
-        const locationGeo = await Location.getCurrentPositionAsync();
-        const locationRevGeocode = await Location.reverseGeocodeAsync({
-            latitude: locationGeo.coords.latitude,
-            longitude: locationGeo.coords.longitude
-        })
-        console.log(locationRevGeocode);
-        console.log(locationRevGeocode[0].country);
-        setCurrentCountry(locationRevGeocode[0].country);
+        if (status === 'granted') {
+            const locationGeo = await Location.getCurrentPositionAsync();
+            const locationRevGeocode = await Location.reverseGeocodeAsync({
+                latitude: locationGeo.coords.latitude,
+                longitude: locationGeo.coords.longitude
+            })
+            console.log(locationRevGeocode);
+            return locationRevGeocode[0].country;
+        } else {
+            console.log('Permission not granted')
+            return ''
+        }
     }
 
     const getListRequest = () => {
@@ -45,7 +52,7 @@ export default function MainScreen({navigation}) {
             .request(options)
             .then((response) => {
                 const newList = response.data.response;
-                // newList.sort((a, b) => b.cases.total - a.cases.total);
+                console.log(newList[0])
                 setList(newList);
             })
             .catch(function (error) {
@@ -53,12 +60,25 @@ export default function MainScreen({navigation}) {
             });
     }
 
-    const updateSearch = (search) => {
-        setSearch(search);
+    const sortList = (a, b) => {
+        if (a.country === currentCountry) {
+            return 1;
+        }
+        if (b.cases.total) {
+            if (a.cases.total) {
+                return b.cases.total > a.cases.total ? 1 : -1
+            }
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 
+
+    const updateSearch = (search) => {
         if (search) {
             const filteredList = list?.filter((item) =>
-                item.country.toLocaleLowerCase().includes(search.toLocaleLowerCase())
+                item.country.toLowerCase().includes(search.toLowerCase())
             );
             setSearchResult(filteredList);
         } else setSearchResult([]);
@@ -75,11 +95,11 @@ export default function MainScreen({navigation}) {
         <SafeAreaView>
             <SearchBar
                 placeholder="Type Here..."
-                onChangeText={updateSearch}
+                onChangeText={setSearch}
                 value={search}
             />
             <ScrollView>
-                {(search ? searchResult : list)?.map((item, index) => (
+                {(search ? searchResult : list)?.sort(sortList).map((item, index) => (
                     <ListItem
                         key={index}
                         bottomDivider
@@ -89,6 +109,7 @@ export default function MainScreen({navigation}) {
                             <ListItem.Title>{item.country}</ListItem.Title>
                             <ListItem.Subtitle>
                                 Total cases: {item.cases.total}
+                                From nav: {item.country === currentCountry ? 'yes' : 'no'}
                             </ListItem.Subtitle>
                         </ListItem.Content>
                         <ListItem.Chevron/>

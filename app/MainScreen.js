@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useState, useEffect} from "react";
 import {StyleSheet, ScrollView, View, SafeAreaView} from "react-native";
-import {ListItem, SearchBar} from "react-native-elements";
+import {Icon, ListItem, SearchBar} from "react-native-elements";
 import axios from "axios";
 import * as Location from 'expo-location';
 
@@ -58,6 +58,7 @@ export default function MainScreen({navigation}) {
     }
 
     const sortList = (a, b) => {
+        // geolocalized item always at the top
         if (a.country === currentCountry) {
             return -1;
         }
@@ -75,6 +76,7 @@ export default function MainScreen({navigation}) {
 
             case 'NEW_CASES':
                 if (a.cases.new && b.cases.new) {
+                    // cutting off '+' sign
                     const aString = a.cases.new.substring(1);
                     const bString = b.cases.new.substring(1);
                     const aInt = parseInt(aString, 10);
@@ -94,7 +96,6 @@ export default function MainScreen({navigation}) {
 
 
     }
-
 
     const updateSearch = (search) => {
         if (search) {
@@ -126,12 +127,12 @@ export default function MainScreen({navigation}) {
                         bottomDivider
                         onPress={() => onListItemPress(item)}
                     >
+                        {item.country === currentCountry ? <Icon name='gps-fixed'/> : null}
                         <ListItem.Content>
                             <ListItem.Title>{item.country}</ListItem.Title>
                             <ListItem.Subtitle>
                                 Total cases: {item.cases.total}
-                                New: {item.cases.new ?? 'none'}
-                                From nav: {item.country === currentCountry ? 'yes' : 'no'}
+                                {/*New: {item.cases.new ?? 'none'}*/}
                             </ListItem.Subtitle>
                         </ListItem.Content>
                         <ListItem.Chevron/>

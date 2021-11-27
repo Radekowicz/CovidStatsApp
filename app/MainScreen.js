@@ -18,7 +18,9 @@ export default function MainScreen({navigation}) {
     const [list, setList] = useState([]);
     const [searchResult, setSearchResult] = useState([]);
 
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState('');
+    const [currentCountry, setCurrentCountry] = useState('');
+
 
     useEffect(() => {
         getListRequest();
@@ -28,10 +30,14 @@ export default function MainScreen({navigation}) {
     const getLocation = async () => {
         console.log('GETTING')
         const {status} = await Location.requestForegroundPermissionsAsync();
-        console.log(status);
-
-        const location = await Location.getCurrentPositionAsync();
-        console.log(location);
+        const locationGeo = await Location.getCurrentPositionAsync();
+        const locationRevGeocode = await Location.reverseGeocodeAsync({
+            latitude: locationGeo.coords.latitude,
+            longitude: locationGeo.coords.longitude
+        })
+        console.log(locationRevGeocode);
+        console.log(locationRevGeocode[0].country);
+        setCurrentCountry(locationRevGeocode[0].country);
     }
 
     const getListRequest = () => {
@@ -39,7 +45,7 @@ export default function MainScreen({navigation}) {
             .request(options)
             .then((response) => {
                 const newList = response.data.response;
-                newList.sort((a, b) => b.cases.total - a.cases.total);
+                // newList.sort((a, b) => b.cases.total - a.cases.total);
                 setList(newList);
             })
             .catch(function (error) {

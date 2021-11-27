@@ -3,7 +3,6 @@ import {useState, useEffect} from "react";
 import {StyleSheet, ScrollView, View, SafeAreaView} from "react-native";
 import {ListItem, SearchBar} from "react-native-elements";
 import axios from "axios";
-import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 
 const options = {
@@ -28,7 +27,7 @@ export default function MainScreen({navigation}) {
 
     const getLocation = async () => {
         console.log('GETTING')
-        const {status} = await Permissions.askAsync(Permissions.LOCATION_FOREGROUND)
+        const {status} = await Location.requestForegroundPermissionsAsync();
         console.log(status);
 
         const location = await Location.getCurrentPositionAsync();

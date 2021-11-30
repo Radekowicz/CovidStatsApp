@@ -62,7 +62,7 @@ export default function MainScreen({navigation}) {
         if (a.country === currentCountry) {
             return -1;
         }
-        const sortBy = 'COUNTRY_NAME'
+        const sortBy = 'TOTAL_DEATHS'
         switch (sortBy) {
             case 'TOTAL_CASES':
                 if (b.cases.total) {
@@ -86,6 +86,16 @@ export default function MainScreen({navigation}) {
                     return 1
                 } else if (!b.cases.new) {
                     return -1;
+                } else {
+                    return 0;
+                }
+
+            case 'TOTAL_DEATHS':
+                if (b.deaths.total) {
+                    if (a.deaths.total) {
+                        return b.deaths.total > a.deaths.total ? 1 : -1
+                    }
+                    return 1;
                 } else {
                     return 0;
                 }
@@ -150,7 +160,7 @@ export default function MainScreen({navigation}) {
                             <ListItem.Title>{item.country}</ListItem.Title>
                             <ListItem.Subtitle>
                                 Total cases: {item.cases.total}
-                                New: {item.deaths.new ?? 'none'}
+                                New: {item.deaths.total ?? 'none'}
                             </ListItem.Subtitle>
                         </ListItem.Content>
                         <ListItem.Chevron/>

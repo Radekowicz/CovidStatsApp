@@ -62,7 +62,7 @@ export default function MainScreen({navigation}) {
         if (a.country === currentCountry) {
             return -1;
         }
-        const sortBy = 'NEW_DEATHS'
+        const sortBy = 'COUNTRY_NAME'
         switch (sortBy) {
             case 'TOTAL_CASES':
                 if (b.cases.total) {
@@ -105,6 +105,9 @@ export default function MainScreen({navigation}) {
                 } else {
                     return 0;
                 }
+
+            case 'COUNTRY_NAME':
+                return a.country.localeCompare(b.country);
             default:
                 return 0;
         }

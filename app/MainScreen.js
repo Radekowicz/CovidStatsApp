@@ -21,6 +21,9 @@ export default function MainScreen({navigation}) {
 
     const [search, setSearch] = useState('');
     const [currentCountry, setCurrentCountry] = useState('');
+    // Problems while sorting occured so currentCountryObject is now a separate
+    const [currentCountryObject, setCurrentCountryObject] = useState({});
+
 
     const [sortField, setSortField] = useState('COUNTRY_NAME');
     const [sortDir, setSortDir] = useState('ASC');
@@ -32,9 +35,22 @@ export default function MainScreen({navigation}) {
 
 
     useEffect(() => {
+        setCurrentCountry('');
         getListRequest();
-        getLocation().then(country => setCurrentCountry(country));
+        getLocation().then(country => {
+            setCurrentCountry(country)
+        });
     }, []);
+
+    useEffect(() => {
+        separateGPSCountry()
+    }, [currentCountry]);
+
+    const separateGPSCountry = () => {
+        const item = list.find((obj) => obj.country === currentCountry);
+        setCurrentCountryObject(item);
+        setList(list.filter((obj) => obj.country !== currentCountry))
+    }
 
     useEffect(() => {
         updateSearch(search);
@@ -59,10 +75,6 @@ export default function MainScreen({navigation}) {
 
     const sortList = (a, b) => {
         const direction = (sortDir === 'ASC' ? 1 : -1);
-        // geolocalized item always at the top
-        if (a.country === currentCountry) {
-            return -1;
-        }
         switch (sortField) {
             case 'TOTAL_CASES':
                 if (b.cases.total) {
@@ -292,6 +304,12 @@ export default function MainScreen({navigation}) {
                     </View>
                 </View>
                 <ScrollView>
+                    {currentCountryObject &&
+                    <TouchableOpacity onPress={() => onListItemPress(currentCountryObject)}>
+                        <ListItemCard
+                            item={currentCountryObject}>
+                        </ListItemCard>
+                    </TouchableOpacity>}
                     {(search ? searchResult : list)?.sort(sortList).map((item, index) => (
                         <TouchableOpacity key={index} onPress={() => onListItemPress(item)}>
                             <ListItemCard

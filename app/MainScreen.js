@@ -1,9 +1,10 @@
 import * as React from "react";
-import {useState, useEffect} from "react";
-import {StyleSheet, ScrollView, View, SafeAreaView} from "react-native";
-import {Icon, ListItem, SearchBar} from "react-native-elements";
+import {useEffect, useState} from "react";
+import {SafeAreaView, ScrollView, StyleSheet, View} from "react-native";
+import {Button, Divider, Menu, Provider, Searchbar} from 'react-native-paper';
 import axios from "axios";
-import * as Location from 'expo-location';
+import {getLocation} from "./utils/CountryFromGPS";
+import {Icon, ListItem} from "react-native-elements";
 
 const options = {
     method: "GET",
@@ -21,6 +22,15 @@ export default function MainScreen({navigation}) {
     const [search, setSearch] = useState('');
     const [currentCountry, setCurrentCountry] = useState('');
 
+    const [sortField, setSortField] = useState('COUNTRY_NAME');
+    const [sortDir, setSortDir] = useState('ASC');
+
+
+    const [filterMenuVisible, setFilterMenuVisible] = useState(false);
+    const openMenu = () => setFilterMenuVisible(true);
+    const closeMenu = () => setFilterMenuVisible(false);
+
+
     useEffect(() => {
         getListRequest();
         getLocation().then(country => setCurrentCountry(country));
@@ -29,21 +39,6 @@ export default function MainScreen({navigation}) {
     useEffect(() => {
         updateSearch(search);
     }, [search]);
-
-    const getLocation = async () => {
-        const {status} = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
-            const locationGeo = await Location.getCurrentPositionAsync();
-            const locationRevGeocode = await Location.reverseGeocodeAsync({
-                latitude: locationGeo.coords.latitude,
-                longitude: locationGeo.coords.longitude
-            })
-            return locationRevGeocode[0].country;
-        } else {
-            console.log('Permission not granted')
-            return ''
-        }
-    }
 
     const getListRequest = () => {
         axios
@@ -57,16 +52,18 @@ export default function MainScreen({navigation}) {
             });
     }
 
+    const setSorting = (field, direction) => {
+        setSortDir(direction);
+        setSortField(field);
+    }
+
     const sortList = (a, b) => {
-        const sortDir = 'DESC'
-        //TRUE asc Fale desc
-        const direction = sortDir === 'ASC' ? 1 : -1;
+        const direction = (sortDir === 'ASC' ? 1 : -1);
         // geolocalized item always at the top
         if (a.country === currentCountry) {
             return -1;
         }
-        const sortBy = 'TOTAL_DEATHS'
-        switch (sortBy) {
+        switch (sortField) {
             case 'TOTAL_CASES':
                 if (b.cases.total) {
                     if (a.cases.total) {
@@ -143,32 +140,123 @@ export default function MainScreen({navigation}) {
     };
 
     return (
-        <SafeAreaView>
-            <SearchBar
-                placeholder="Type Here..."
-                onChangeText={setSearch}
-                value={search}
-            />
-            <ScrollView>
-                {(search ? searchResult : list)?.sort(sortList).map((item, index) => (
-                    <ListItem
-                        key={index}
-                        bottomDivider
-                        onPress={() => onListItemPress(item)}
-                    >
-                        {item.country === currentCountry ? <Icon name='gps-fixed'/> : null}
-                        <ListItem.Content>
-                            <ListItem.Title>{item.country}</ListItem.Title>
-                            <ListItem.Subtitle>
-                                Total cases: {item.cases.total}
-                                New: {item.deaths.total ?? 'none'}
-                            </ListItem.Subtitle>
-                        </ListItem.Content>
-                        <ListItem.Chevron/>
-                    </ListItem>
-                ))}
-            </ScrollView>
-        </SafeAreaView>
+        <Provider>
+            <SafeAreaView>
+                <View style={{
+                    position: 'relative',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignContent: 'stretch',
+                    alignItems: 'stretch',
+                    borderBottomWidth: 1,
+                    borderColor: 'lightblue',
+
+                }}>
+                    <Searchbar style={{
+                        width: '80%',
+                        height: 50,
+                    }}
+                               placeholder="Type Here..."
+                               onChangeText={setSearch}
+                               value={search}
+                    />
+
+                    <View
+                        style={{
+                            position: 'relative',
+                            width: '20%',
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                        }}>
+                        <Menu
+                            visible={filterMenuVisible}
+                            onDismiss={closeMenu}
+                            anchor={
+                                <Button
+                                    style={{
+                                        width: '100%',
+                                        padding: 0,
+                                        margin: 0,
+                                        height: 50,
+                                    }}
+                                    contentStyle={{
+                                        height: '100%',
+                                        width: '100%'
+                                    }}
+                                    color='lightblue'
+                                    mode="contained" onPress={openMenu}>
+                                    <Icon size='36' name='sort'/>
+                                </Button>
+                            }>
+                            <Menu.Item onPress={() => {
+                                setSorting('COUNTRY_NAME', 'ASC');
+                                closeMenu();
+                            }} title="Country name ascending"/>
+                            <Menu.Item onPress={() => {
+                                setSorting('COUNTRY_NAME', 'DESC');
+                                closeMenu();
+                            }} title="Country name descending"/>
+                            <Divider/>
+                            <Menu.Item onPress={() => {
+                                setSorting('TOTAL_CASES', 'ASC');
+                                closeMenu();
+                            }} title="Total cases ascending"/>
+                            <Menu.Item onPress={() => {
+                                setSorting('TOTAL_CASES', 'DESC');
+                                closeMenu();
+                            }} title="Total cases descending"/>
+                            <Divider/>
+                            <Menu.Item onPress={() => {
+                                setSorting('NEW_CASES', 'ASC');
+                                closeMenu();
+                            }} title="New cases ascending"/>
+                            <Menu.Item onPress={() => {
+                                setSorting('NEW_CASES', 'DESC');
+                                closeMenu();
+                            }} title="New cases descending"/>
+                            <Divider/>
+                            <Menu.Item onPress={() => {
+                                setSorting('TOTAL_DEATHS', 'ASC');
+                                closeMenu();
+                            }} title="Total deaths ascending"/>
+                            <Menu.Item onPress={() => {
+                                setSorting('TOTAL_DEATHS', 'DESC');
+                                closeMenu();
+                            }} title="Total deaths descending"/>
+                            <Divider/>
+                            <Menu.Item onPress={() => {
+                                setSorting('NEW_DEATHS', 'ASC');
+                                closeMenu();
+                            }} title="New deaths ascending"/>
+                            <Menu.Item onPress={() => {
+                                setSorting('NEW_DEATHS', 'DESC');
+                                closeMenu();
+                            }} title="New deaths descending"/>
+
+                        </Menu>
+                    </View>
+                </View>
+                <ScrollView>
+                    {(search ? searchResult : list)?.sort(sortList).map((item, index) => (
+                        <ListItem
+                            key={index}
+                            bottomDivider
+                            onPress={() => onListItemPress(item)}
+                        >
+                            {item.country === currentCountry ? <Icon name='gps-fixed'/> : null}
+                            <ListItem.Content>
+                                <ListItem.Title>{item.country}</ListItem.Title>
+                                <ListItem.Subtitle>
+                                    Total cases: {item.cases.total}
+                                    New: {item.deaths.total ?? 'none'}
+                                </ListItem.Subtitle>
+                            </ListItem.Content>
+                            <ListItem.Chevron/>
+                        </ListItem>
+                    ))}
+                </ScrollView>
+            </SafeAreaView>
+        </Provider>
     );
 }
 

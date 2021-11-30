@@ -62,9 +62,9 @@ export default function MainScreen({navigation}) {
         if (a.country === currentCountry) {
             return -1;
         }
-        const sortBy = 'NEW_CASES'
+        const sortBy = 'NEW_DEATHS'
         switch (sortBy) {
-            case 'TOTAL':
+            case 'TOTAL_CASES':
                 if (b.cases.total) {
                     if (a.cases.total) {
                         return b.cases.total > a.cases.total ? 1 : -1
@@ -90,6 +90,21 @@ export default function MainScreen({navigation}) {
                     return 0;
                 }
 
+            case 'NEW_DEATHS':
+                if (a.deaths.new && b.deaths.new) {
+                    // cutting off '+' sign
+                    const aString = a.deaths.new.substring(1);
+                    const bString = b.deaths.new.substring(1);
+                    const aInt = parseInt(aString, 10);
+                    const bInt = parseInt(bString, 10);
+                    return bInt - aInt;
+                } else if (!a.deaths.new) {
+                    return 1
+                } else if (!b.deaths.new) {
+                    return -1;
+                } else {
+                    return 0;
+                }
             default:
                 return 0;
         }
@@ -132,7 +147,7 @@ export default function MainScreen({navigation}) {
                             <ListItem.Title>{item.country}</ListItem.Title>
                             <ListItem.Subtitle>
                                 Total cases: {item.cases.total}
-                                {/*New: {item.cases.new ?? 'none'}*/}
+                                New: {item.deaths.new ?? 'none'}
                             </ListItem.Subtitle>
                         </ListItem.Content>
                         <ListItem.Chevron/>

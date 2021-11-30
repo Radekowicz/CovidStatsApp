@@ -58,6 +58,9 @@ export default function MainScreen({navigation}) {
     }
 
     const sortList = (a, b) => {
+        const sortDir = 'DESC'
+        //TRUE asc Fale desc
+        const direction = sortDir === 'ASC' ? 1 : -1;
         // geolocalized item always at the top
         if (a.country === currentCountry) {
             return -1;
@@ -67,9 +70,9 @@ export default function MainScreen({navigation}) {
             case 'TOTAL_CASES':
                 if (b.cases.total) {
                     if (a.cases.total) {
-                        return b.cases.total > a.cases.total ? 1 : -1
+                        return (b.cases.total > a.cases.total ? 1 : -1) * direction
                     }
-                    return 1;
+                    return 1 * direction;
                 } else {
                     return 0;
                 }
@@ -81,11 +84,11 @@ export default function MainScreen({navigation}) {
                     const bString = b.cases.new.substring(1);
                     const aInt = parseInt(aString, 10);
                     const bInt = parseInt(bString, 10);
-                    return bInt - aInt;
+                    return (bInt - aInt) * direction;
                 } else if (!a.cases.new) {
-                    return 1
+                    return 1 * direction
                 } else if (!b.cases.new) {
-                    return -1;
+                    return -1 * direction;
                 } else {
                     return 0;
                 }
@@ -93,9 +96,9 @@ export default function MainScreen({navigation}) {
             case 'TOTAL_DEATHS':
                 if (b.deaths.total) {
                     if (a.deaths.total) {
-                        return b.deaths.total > a.deaths.total ? 1 : -1
+                        return (b.deaths.total > a.deaths.total ? 1 : -1) * direction
                     }
-                    return 1;
+                    return 1 * direction;
                 } else {
                     return 0;
                 }
@@ -107,22 +110,20 @@ export default function MainScreen({navigation}) {
                     const bString = b.deaths.new.substring(1);
                     const aInt = parseInt(aString, 10);
                     const bInt = parseInt(bString, 10);
-                    return bInt - aInt;
+                    return (bInt - aInt) * direction;
                 } else if (!a.deaths.new) {
-                    return 1
+                    return 1 * direction;
                 } else if (!b.deaths.new) {
-                    return -1;
+                    return -1 * direction;
                 } else {
                     return 0;
                 }
 
             case 'COUNTRY_NAME':
-                return a.country.localeCompare(b.country);
+                return (a.country.localeCompare(b.country)) * direction;
             default:
                 return 0;
         }
-
-
     }
 
     const updateSearch = (search) => {

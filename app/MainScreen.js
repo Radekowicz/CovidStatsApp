@@ -1,7 +1,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import {SafeAreaView, ScrollView, StyleSheet, View} from "react-native";
-import {Button, Divider, Menu, Provider, Searchbar} from 'react-native-paper';
+import {SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
+import {Button, Divider, Menu, Provider, Searchbar, Text} from 'react-native-paper';
 import axios from "axios";
 import {getLocation} from "./utils/CountryFromGPS";
 import {Icon, ListItem} from "react-native-elements";
@@ -139,6 +139,61 @@ export default function MainScreen({navigation}) {
         });
     };
 
+
+    function ListItemCard(props) {
+        return (
+            <View style={{
+                width: '100%',
+                backgroundColor: 'white',
+                padding: 16,
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                borderBottomWidth: 1,
+                borderColor: 'lightblue',
+            }}>
+                <View style={{
+                    width: '100%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                }}>
+                    <View style={{flexDirection: 'row'}}>
+                        <Text style={{fontSize: 24}}>{props.item.country}</Text>
+                        {props.item.country === currentCountry &&
+                        <Icon style={{marginLeft: 4}} size={24} name='gps-fixed'/>
+                        }
+                    </View>
+                    {/*<Text>{props.item.}</Text>*/}
+                </View>
+                <View style={{
+                    width: '100%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                }}>
+                    <Text style={{fontSize: 18}}>Total cases: {props.item.cases.total}</Text>
+                    <View style={{flexDirection: 'row'}}><Text
+                        style={{fontSize: 18}}>{props.item.cases.new ?? 'N/A'}</Text>
+                        {props.item.cases.new && <Icon style={{marginLeft: 4}}
+                                                       color={'red'}
+                                                       size={18} name='arrow-upward'/>}
+                    </View>
+                </View>
+                <View style={{
+                    width: '100%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                }}>
+                    <Text style={{fontSize: 14}}>Total deaths: {props.item.deaths.total}</Text>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Text style={{fontSize: 14}}>{props.item.deaths.new ?? 'N/A'}</Text>
+                        {props.item.deaths.new &&
+                        <Icon style={{marginLeft: 4}} size={20} name='sentiment-very-dissatisfied'/>}
+                    </View>
+                </View>
+            </View>
+        )
+    }
+
+
     return (
         <Provider>
             <SafeAreaView>
@@ -185,7 +240,7 @@ export default function MainScreen({navigation}) {
                                     }}
                                     color='lightblue'
                                     mode="contained" onPress={openMenu}>
-                                    <Icon size='36' name='sort'/>
+                                    <Icon size={36} name='sort'/>
                                 </Button>
                             }>
                             <Menu.Item onPress={() => {
@@ -238,23 +293,13 @@ export default function MainScreen({navigation}) {
                 </View>
                 <ScrollView>
                     {(search ? searchResult : list)?.sort(sortList).map((item, index) => (
-                        <ListItem
-                            key={index}
-                            bottomDivider
-                            onPress={() => onListItemPress(item)}
-                        >
-                            {item.country === currentCountry ? <Icon name='gps-fixed'/> : null}
-                            <ListItem.Content>
-                                <ListItem.Title>{item.country}</ListItem.Title>
-                                <ListItem.Subtitle>
-                                    Total cases: {item.cases.total}
-                                    New cases: {item.cases.new ?? 'none'}
-                                    Total dead: {item.deaths.total}
-                                    New ded: {item.deaths.new ?? 'none'}
-                                </ListItem.Subtitle>
-                            </ListItem.Content>
-                            <ListItem.Chevron/>
-                        </ListItem>
+                        <TouchableOpacity key={index} onPress={() => onListItemPress(item)}>
+                            <ListItemCard
+                                key={index}
+                                item={item}>
+                            </ListItemCard>
+                        </TouchableOpacity>
+
                     ))}
                 </ScrollView>
             </SafeAreaView>

@@ -181,10 +181,10 @@ export default function MainScreen({navigation}) {
                     flexDirection: 'row',
                     justifyContent: 'space-between'
                 }}>
-                    <Text style={{fontSize: 18}}>Total cases: {props.item.cases.total}</Text>
+                    <Text style={{fontSize: 18}}>Total cases: {props?.item?.cases?.total}</Text>
                     <View style={{flexDirection: 'row'}}><Text
-                        style={{fontSize: 18}}>{props.item.cases.new ?? 'N/A'}</Text>
-                        {props.item.cases.new && <Icon style={{marginLeft: 4}}
+                        style={{fontSize: 18}}>{props?.item?.cases?.new ?? 'N/A'}</Text>
+                        {props.item?.cases?.new && <Icon style={{marginLeft: 4}}
                                                        color={'red'}
                                                        size={18} name='arrow-upward'/>}
                     </View>
@@ -194,10 +194,10 @@ export default function MainScreen({navigation}) {
                     flexDirection: 'row',
                     justifyContent: 'space-between'
                 }}>
-                    <Text style={{fontSize: 14}}>Total deaths: {props.item.deaths.total}</Text>
+                    <Text style={{fontSize: 14}}>Total deaths: {props?.item?.deaths?.total}</Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <Text style={{fontSize: 14}}>{props.item.deaths.new ?? 'N/A'}</Text>
-                        {props.item.deaths.new &&
+                        <Text style={{fontSize: 14}}>{props?.item?.deaths?.new ?? 'N/A'}</Text>
+                        {props.item?.deaths?.new &&
                         <Icon style={{marginLeft: 4}} size={20} name='sentiment-very-dissatisfied'/>}
                     </View>
                 </View>

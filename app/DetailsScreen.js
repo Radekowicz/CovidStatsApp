@@ -39,11 +39,9 @@ const historyOptions = (country, date) => {
 function Box({ title, data }) {
   return (
     <View style={styles.box}>
-      <Card>
-        <Card.Title>{title}</Card.Title>
-        <Card.Divider />
-        <Card.Title>{data}</Card.Title>
-      </Card>
+      <Card.Title style={{ fontSize: 18 }}>{title}</Card.Title>
+      <Card.Divider />
+      <Card.Title>{data ? data : "N/A"}</Card.Title>
     </View>
   );
 }
@@ -52,23 +50,16 @@ export default function DetailsScreen({ route, navigation }) {
   const { country } = route.params;
   const [data, setData] = useState();
 
-  const [chartData, setChartData] = useState([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-  const [chartLabels, setChartLabels] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const [chartData, setChartData] = useState([0, 0, 0, 0, 0, 0, 0]);
+  const [chartLabels, setChartLabels] = useState(["", "", "", "", "", "", ""]);
 
   useEffect(() => {
-    getCountryRequest();
-    getDataFromPastMonth();
+    try {
+      getCountryRequest();
+      getDataFromPastMonth();
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   const getCountryRequest = () => {
@@ -93,13 +84,22 @@ export default function DetailsScreen({ route, navigation }) {
 
   const getDataFromPastMonth = async () => {
     const array = [];
-    for (let i = 6; i >= 0; i--) {
+    let iterations = 0;
+    let day = 0;
+    while (iterations < 7) {
+      if (day > 20) break;
       const response = await getHistoryRequest(
         country,
-        dayjs().subtract(i, "day")
+        dayjs().subtract(day, "day")
       );
-      array.push(response);
+      day++;
+
+      if (response !== undefined) {
+        array.unshift(response);
+        iterations++;
+      }
     }
+
     setChartLabels(getLabels(array));
     setChartData(getData(array));
   };
@@ -128,13 +128,13 @@ export default function DetailsScreen({ route, navigation }) {
             },
           ],
         }}
-        width={Dimensions.get("window").width} // from react-native
+        width={Dimensions.get("window").width}
         height={220}
         yAxisSuffix="k"
         chartConfig={{
-          backgroundColor: "#e26a00",
-          backgroundGradientFrom: "#fb8c00",
-          backgroundGradientTo: "#ffa726",
+          backgroundColor: "#00a2d6",
+          backgroundGradientFrom: "#00c1ff",
+          backgroundGradientTo: "#41cefa",
           decimalPlaces: 0,
           color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -144,7 +144,7 @@ export default function DetailsScreen({ route, navigation }) {
           propsForDots: {
             r: "6",
             strokeWidth: "2",
-            stroke: "#ffa726",
+            stroke: "#41cefa",
           },
         }}
         bezier
@@ -154,11 +154,11 @@ export default function DetailsScreen({ route, navigation }) {
         }}
       />
       <View style={styles.container}>
-        <Box title="New cases today" data={data?.cases.new} />
+        <Box title="New cases" data={data?.cases.new} />
         <Box title="Total cases" data={data?.cases.total} />
       </View>
       <View style={styles.container}>
-        <Box title="New deaths today" data={data?.deaths.new} />
+        <Box title="New deaths" data={data?.deaths.new} />
         <Box title="Total deaths" data={data?.deaths.total} />
       </View>
       <View style={styles.container}>
@@ -171,14 +171,19 @@ export default function DetailsScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   saveView: {},
-  title: { padding: 10 },
+  title: { padding: 10, color: "#2e2e2e", fontWeight: "600" },
   container: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
   },
   box: {
-    width: Dimensions.get("window").width / 2,
+    width: Dimensions.get("window").width / 2 - 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "grey",
+    margin: 10,
+    padding: 10,
   },
   chart: {},
 });

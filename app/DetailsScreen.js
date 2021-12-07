@@ -115,56 +115,61 @@ export default function DetailsScreen({ route, navigation }) {
 
   return (
     <SafeAreaView style={styles.saveView}>
-      <Text style={styles.title} h2>
-        {data?.country}
-      </Text>
+      <ScrollView>
+        <Text style={styles.title} h2>
+          {data?.country}
+        </Text>
 
-      <LineChart
-        data={{
-          labels: chartLabels,
-          datasets: [
-            {
-              data: chartData,
+        <Text style={styles.title} h4>
+          Active cases from 7 days
+        </Text>
+        <LineChart
+          data={{
+            labels: chartLabels,
+            datasets: [
+              {
+                data: chartData,
+              },
+            ],
+          }}
+          width={Dimensions.get("window").width}
+          height={220}
+          yAxisSuffix="k"
+          chartConfig={{
+            backgroundColor: "#00a2d6",
+            backgroundGradientFrom: "#00c1ff",
+            backgroundGradientTo: "#41cefa",
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16,
             },
-          ],
-        }}
-        width={Dimensions.get("window").width}
-        height={220}
-        yAxisSuffix="k"
-        chartConfig={{
-          backgroundColor: "#00a2d6",
-          backgroundGradientFrom: "#00c1ff",
-          backgroundGradientTo: "#41cefa",
-          decimalPlaces: 0,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
+            propsForDots: {
+              r: "6",
+              strokeWidth: "2",
+              stroke: "#41cefa",
+            },
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
             borderRadius: 16,
-          },
-          propsForDots: {
-            r: "6",
-            strokeWidth: "2",
-            stroke: "#41cefa",
-          },
-        }}
-        bezier
-        style={{
-          marginVertical: 8,
-          borderRadius: 16,
-        }}
-      />
-      <View style={styles.container}>
-        <Box title="New cases" data={data?.cases.new} />
-        <Box title="Total cases" data={data?.cases.total} />
-      </View>
-      <View style={styles.container}>
-        <Box title="New deaths" data={data?.deaths.new} />
-        <Box title="Total deaths" data={data?.deaths.total} />
-      </View>
-      <View style={styles.container}>
-        <Box title="Active cases" data={data?.cases.active} />
-        <Box title="Recovered" data={data?.cases.recovered} />
-      </View>
+          }}
+        />
+        <View style={styles.container}>
+          <Box title="New cases" data={data?.cases.new} />
+          <Box title="Total cases" data={data?.cases.total} />
+        </View>
+        <View style={styles.container}>
+          <Box title="New deaths" data={data?.deaths.new} />
+          <Box title="Total deaths" data={data?.deaths.total} />
+        </View>
+        <View style={styles.container}>
+          <Box title="Active cases" data={data?.cases.active} />
+          <Box title="Recovered" data={data?.cases.recovered} />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -172,6 +177,7 @@ export default function DetailsScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   saveView: {},
   title: { padding: 10, color: "#2e2e2e", fontWeight: "600" },
+
   container: {
     display: "flex",
     flexDirection: "row",
@@ -183,7 +189,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "grey",
     margin: 10,
-    padding: 10,
+    padding: 8,
   },
   chart: {},
 });
